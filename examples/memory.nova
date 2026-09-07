@@ -1,0 +1,27 @@
+// Direct Linear Memory Operations in Nova
+// Demonstrates memory declaration, @store_i32, @load_i32
+
+export memory 2; // 2 pages = 128 KB
+
+export fn write_array(base_ptr: i32, count: i32, multiplier: i32) -> i32 {
+    let mut i: i32 = 0;
+    while i < count {
+        let addr: i32 = base_ptr + i * 4;
+        let value: i32 = (i + 1) * multiplier;
+        @store_i32(addr, value);
+        i += 1;
+    }
+    return count;
+}
+
+export fn sum_array(base_ptr: i32, count: i32) -> i32 {
+    let mut sum: i32 = 0;
+    let mut i: i32 = 0;
+    while i < count {
+        let addr: i32 = base_ptr + i * 4;
+        let val: i32 = @load_i32(addr);
+        sum += val;
+        i += 1;
+    }
+    return sum;
+}

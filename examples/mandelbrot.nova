@@ -1,0 +1,44 @@
+// Mandelbrot Set Escape Time Algorithm in Nova
+// Uses fixed-point integer arithmetic (scale factor 1000)
+// Writes iteration counts directly into linear memory for rendering on HTML5 canvas
+
+export memory 4; // 4 pages = 256 KB
+
+export fn render_mandelbrot(width: i32, height: i32, max_iter: i32) -> i32 {
+    let mut y: i32 = 0;
+    while y < height {
+        let mut x: i32 = 0;
+        while x < width {
+            // Map pixel to complex coordinate: c_re in [-2.0, 1.0], c_im in [-1.5, 1.5]
+            // Scale: 1000
+            let c_re: i32 = -2000 + (x * 3000) / width;
+            let c_im: i32 = -1500 + (y * 3000) / height;
+
+            let mut z_re: i32 = 0;
+            let mut z_im: i32 = 0;
+            let mut iter: i32 = 0;
+
+            while iter < max_iter {
+                let z_re2: i32 = (z_re * z_re) / 1000;
+                let z_im2: i32 = (z_im * z_im) / 1000;
+
+                if z_re2 + z_im2 > 4000 {
+                    // Escaped
+                    break;
+                }
+
+                let new_z_im: i32 = (2 * z_re * z_im) / 1000 + c_im;
+                z_re = z_re2 - z_im2 + c_re;
+                z_im = new_z_im;
+                iter += 1;
+            }
+
+            let offset: i32 = (y * width + x) * 4;
+            @store_i32(offset, iter);
+            x += 1;
+        }
+        y += 1;
+    }
+
+    return width * height;
+}

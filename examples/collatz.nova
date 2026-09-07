@@ -1,0 +1,18 @@
+// Collatz Conjecture Step Counter in Nova
+// Demonstrates conditionals, modulo, and while loops
+
+export fn collatz_steps(n: i32) -> i32 {
+    let mut val: i32 = n;
+    let mut steps: i32 = 0;
+
+    while val > 1 {
+        if val % 2 == 0 {
+            val = val / 2;
+        } else {
+            val = 3 * val + 1;
+        }
+        steps += 1;
+    }
+
+    return steps;
+}

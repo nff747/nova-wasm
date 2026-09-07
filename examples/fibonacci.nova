@@ -1,0 +1,31 @@
+// Fibonacci Calculation in Nova
+// Demonstrates recursion, while loops, mutable bindings, and exports
+
+export fn fib_recursive(n: i32) -> i32 {
+    if n <= 1 {
+        return n;
+    }
+    return fib_recursive(n - 1) + fib_recursive(n - 2);
+}
+
+export fn fib_iterative(n: i32) -> i32 {
+    if n <= 0 {
+        return 0;
+    }
+    if n == 1 {
+        return 1;
+    }
+
+    let mut prev: i32 = 0;
+    let mut curr: i32 = 1;
+    let mut i: i32 = 2;
+
+    while i <= n {
+        let next: i32 = prev + curr;
+        prev = curr;
+        curr = next;
+        i += 1;
+    }
+
+    return curr;
+}
