@@ -21,6 +21,18 @@ impl WatEmitter {
             out.push_str("  (memory (export \"memory\") 1)\n");
         }
 
+        // Imports
+        for imp in &program.imports {
+            out.push_str(&format!("  (import \"{}\" \"{}\" (func ${}", imp.module, imp.field, imp.name));
+            for p in &imp.params {
+                out.push_str(&format!(" (param ${} {})", p.name, p.ty));
+            }
+            if imp.return_type != Type::Void {
+                out.push_str(&format!(" (result {})", imp.return_type));
+            }
+            out.push_str("))\n");
+        }
+
         // Functions
         for func in &program.functions {
             out.push_str(&format!("  (func ${}", func.name));

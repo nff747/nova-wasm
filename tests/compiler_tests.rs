@@ -225,3 +225,51 @@ fn test_while_loop_with_break() {
     assert!(output.status.success(), "Break statement Wasm verification failed: {}", String::from_utf8_lossy(&output.stderr));
     let _ = std::fs::remove_file(tmp_path);
 }
+
+#[test]
+fn test_host_import_and_execution() {
+    let source = r#"
+        import "env" "host_add" fn host_add(a: i32, b: i32) -> i32;
+
+        export fn call_host(x: i32) -> i32 {
+            return host_add(x, 100);
+        }
+    "#;
+
+    let wasm = compile_to_wasm(source).expect("Host import compilation failed");
+    let tmp_path = std::env::temp_dir().join("nova_test_import.wasm");
+    std::fs::write(&tmp_path, &wasm).expect("Failed to write test wasm");
+
+    let script = format!(
+        r#"
+        const fs = require('fs');
+        const buf = fs.readFileSync('{}');
+        const importObject = {{
+            env: {{
+                host_add: (a, b) => a + b
+            }}
+        }};
+        WebAssembly.instantiate(buf, importObject).then(res => {{
+            const val = res.instance.exports.call_host(42);
+            if (val !== 142) {{
+                console.error("Expected 142, got", val);
+                process.exit(1);
+            }}
+            process.exit(0);
+        }}).catch(err => {{
+            console.error(err);
+            process.exit(2);
+        }});
+        "#,
+        tmp_path.display()
+    );
+
+    let output = Command::new("node")
+        .arg("-e")
+        .arg(&script)
+        .output()
+        .expect("Failed to run Node.js");
+
+    assert!(output.status.success(), "Host import execution failed: {}", String::from_utf8_lossy(&output.stderr));
+    let _ = std::fs::remove_file(tmp_path);
+}

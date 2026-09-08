@@ -32,6 +32,21 @@ impl TypeChecker {
     }
 
     pub fn check_program(&mut self, program: &Program) -> Result<(), String> {
+        // Collect imported function signatures
+        for imp in &program.imports {
+            if self.functions.contains_key(&imp.name) {
+                return Err(format!("Duplicate function/import '{}' at {}", imp.name, imp.span));
+            }
+            let params = imp.params.iter().map(|p| p.ty.clone()).collect();
+            self.functions.insert(
+                imp.name.clone(),
+                FuncSignature {
+                    params,
+                    return_type: imp.return_type.clone(),
+                },
+            );
+        }
+
         // First pass: collect all function signatures
         for func in &program.functions {
             if self.functions.contains_key(&func.name) {

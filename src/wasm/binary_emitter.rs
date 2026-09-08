@@ -32,18 +32,27 @@ impl WasmBinaryEmitter {
         // 2. Version: 1
         wasm.extend_from_slice(&[0x01, 0x00, 0x00, 0x00]);
 
-        // Register function indices
+        // Register function indices (imports take indices 0..num_imports, defined funcs follow)
+        let num_imports = program.imports.len() as u32;
+        for (idx, imp) in program.imports.iter().enumerate() {
+            self.functions.insert(imp.name.clone(), idx as u32);
+        }
         for (idx, func) in program.functions.iter().enumerate() {
-            self.functions.insert(func.name.clone(), idx as u32);
+            self.functions.insert(func.name.clone(), num_imports + (idx as u32));
         }
 
         // 3. Type Section (Section 1)
         self.emit_type_section(program, &mut wasm);
 
-        // 4. Function Section (Section 3)
+        // 4. Import Section (Section 2)
+        if !program.imports.is_empty() {
+            self.emit_import_section(program, &mut wasm);
+        }
+
+        // 5. Function Section (Section 3)
         self.emit_function_section(program, &mut wasm);
 
-        // 5. Memory Section (Section 5)
+        // 6. Memory Section (Section 5)
         if let Some(mem) = &program.memory {
             self.emit_memory_section(mem, &mut wasm);
         } else {
@@ -57,10 +66,10 @@ impl WasmBinaryEmitter {
             self.emit_memory_section(&default_mem, &mut wasm);
         }
 
-        // 6. Export Section (Section 7)
+        // 7. Export Section (Section 7)
         self.emit_export_section(program, &mut wasm);
 
-        // 7. Code Section (Section 10)
+        // 8. Code Section (Section 10)
         self.emit_code_section(program, &mut wasm)?;
 
         Ok(wasm)
@@ -69,19 +78,31 @@ impl WasmBinaryEmitter {
     fn emit_type_section(&self, program: &Program, wasm: &mut Vec<u8>) {
         let mut section_payload = Vec::new();
 
-        // Vector of function types
-        encode_u32(program.functions.len() as u32, &mut section_payload);
+        let total_types = program.imports.len() + program.functions.len();
+        encode_u32(total_types as u32, &mut section_payload);
 
+        // Import function types first
+        for imp in &program.imports {
+            section_payload.push(FUNC_TYPE);
+            encode_u32(imp.params.len() as u32, &mut section_payload);
+            for p in &imp.params {
+                section_payload.push(type_to_wasm_val(&p.ty));
+            }
+            if imp.return_type == Type::Void {
+                encode_u32(0, &mut section_payload);
+            } else {
+                encode_u32(1, &mut section_payload);
+                section_payload.push(type_to_wasm_val(&imp.return_type));
+            }
+        }
+
+        // Defined function types
         for func in &program.functions {
             section_payload.push(FUNC_TYPE);
-
-            // Params
             encode_u32(func.params.len() as u32, &mut section_payload);
             for p in &func.params {
                 section_payload.push(type_to_wasm_val(&p.ty));
             }
-
-            // Results
             if func.return_type == Type::Void {
                 encode_u32(0, &mut section_payload);
             } else {
@@ -93,13 +114,28 @@ impl WasmBinaryEmitter {
         self.write_section(SECTION_TYPE, &section_payload, wasm);
     }
 
+    fn emit_import_section(&self, program: &Program, wasm: &mut Vec<u8>) {
+        let mut section_payload = Vec::new();
+        encode_u32(program.imports.len() as u32, &mut section_payload);
+
+        for (idx, imp) in program.imports.iter().enumerate() {
+            encode_name(&imp.module, &mut section_payload);
+            encode_name(&imp.field, &mut section_payload);
+            section_payload.push(0x00); // Kind 0x00 = Function
+            encode_u32(idx as u32, &mut section_payload); // Type index
+        }
+
+        self.write_section(SECTION_IMPORT, &section_payload, wasm);
+    }
+
     fn emit_function_section(&self, program: &Program, wasm: &mut Vec<u8>) {
         let mut section_payload = Vec::new();
+        let num_imports = program.imports.len() as u32;
 
         encode_u32(program.functions.len() as u32, &mut section_payload);
         for idx in 0..program.functions.len() {
-            // Each function corresponds 1:1 to type index
-            encode_u32(idx as u32, &mut section_payload);
+            // Each defined function corresponds to type index following imports
+            encode_u32(num_imports + (idx as u32), &mut section_payload);
         }
 
         self.write_section(SECTION_FUNCTION, &section_payload, wasm);
@@ -123,11 +159,12 @@ impl WasmBinaryEmitter {
 
     fn emit_export_section(&self, program: &Program, wasm: &mut Vec<u8>) {
         let mut exports = Vec::new();
+        let num_imports = program.imports.len() as u32;
 
-        // Collect function exports
+        // Collect function exports with global function index
         for (idx, func) in program.functions.iter().enumerate() {
             if func.is_export {
-                exports.push((func.name.clone(), EXPORT_DESC_FUNC, idx as u32));
+                exports.push((func.name.clone(), EXPORT_DESC_FUNC, num_imports + (idx as u32)));
             }
         }
 

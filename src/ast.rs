@@ -172,7 +172,18 @@ pub struct MemoryDecl {
 }
 
 #[derive(Debug, Clone, PartialEq)]
+pub struct ImportFunc {
+    pub module: String,
+    pub field: String,
+    pub name: String,
+    pub params: Vec<Param>,
+    pub return_type: Type,
+    pub span: Span,
+}
+
+#[derive(Debug, Clone, PartialEq)]
 pub struct Program {
+    pub imports: Vec<ImportFunc>,
     pub functions: Vec<Function>,
     pub memory: Option<MemoryDecl>,
 }

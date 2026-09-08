@@ -14,10 +14,16 @@ impl Parser {
     }
 
     pub fn parse_program(&mut self) -> Result<Program, String> {
+        let mut imports = Vec::new();
         let mut functions = Vec::new();
         let mut memory = None;
 
         while !self.is_at_end() {
+            if self.check(&TokenKind::Import) {
+                imports.push(self.parse_import_decl()?);
+                continue;
+            }
+
             let is_export = self.match_token(&TokenKind::Export);
 
             if self.check(&TokenKind::Memory) {
@@ -33,7 +39,74 @@ impl Parser {
             }
         }
 
-        Ok(Program { functions, memory })
+        Ok(Program { imports, functions, memory })
+    }
+
+    fn parse_import_decl(&mut self) -> Result<ImportFunc, String> {
+        let import_token = self.consume(&TokenKind::Import, "Expected 'import'")?;
+        let module = match self.advance().kind {
+            TokenKind::Str(s) => s,
+            _ => return Err(format!("Expected module name string after 'import' at {}", import_token.span)),
+        };
+
+        let mut field = None;
+        if let TokenKind::Str(s) = &self.peek().kind {
+            field = Some(s.clone());
+            self.advance();
+        }
+
+        self.consume(&TokenKind::Fn, "Expected 'fn' in import declaration")?;
+        let name_token = self.peek().clone();
+        let name = match self.advance().kind {
+            TokenKind::Ident(n) => n,
+            _ => return Err(format!("Expected function identifier in import at {}", name_token.span)),
+        };
+
+        let resolved_field = field.unwrap_or_else(|| name.clone());
+
+        self.consume(&TokenKind::LParen, "Expected '(' after imported function name")?;
+        let mut params = Vec::new();
+
+        if !self.check(&TokenKind::RParen) {
+            loop {
+                let p_span = self.peek().span;
+                let p_name = match self.advance().kind {
+                    TokenKind::Ident(n) => n,
+                    _ => return Err(format!("Expected parameter name at {}", p_span)),
+                };
+
+                self.consume(&TokenKind::Colon, "Expected ':' after parameter name")?;
+                let p_ty = self.parse_type()?;
+                params.push(Param {
+                    name: p_name,
+                    ty: p_ty,
+                    span: p_span,
+                });
+
+                if !self.match_token(&TokenKind::Comma) {
+                    break;
+                }
+            }
+        }
+
+        self.consume(&TokenKind::RParen, "Expected ')' after parameters")?;
+
+        let return_type = if self.match_token(&TokenKind::Arrow) {
+            self.parse_type()?
+        } else {
+            Type::Void
+        };
+
+        self.consume(&TokenKind::Semicolon, "Expected ';' after import declaration")?;
+
+        Ok(ImportFunc {
+            module,
+            field: resolved_field,
+            name,
+            params,
+            return_type,
+            span: import_token.span,
+        })
     }
 
     fn parse_memory_decl(&mut self, is_export: bool) -> Result<MemoryDecl, String> {
