@@ -478,6 +478,7 @@ impl Parser {
             TokenKind::Float(v) => Ok(Expression::LiteralFloat(v, token.span)),
             TokenKind::True => Ok(Expression::LiteralBool(true, token.span)),
             TokenKind::False => Ok(Expression::LiteralBool(false, token.span)),
+            TokenKind::Str(s) => Ok(Expression::LiteralString(s, token.span)),
             TokenKind::Ident(name) => {
                 if self.check(&TokenKind::LParen) {
                     // Function call

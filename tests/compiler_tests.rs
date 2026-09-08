@@ -273,3 +273,52 @@ fn test_host_import_and_execution() {
     assert!(output.status.success(), "Host import execution failed: {}", String::from_utf8_lossy(&output.stderr));
     let _ = std::fs::remove_file(tmp_path);
 }
+
+#[test]
+fn test_string_literal_data_section() {
+    let source = r#"
+        export fn get_greeting() -> i32 {
+            let str: i32 = "Hello, Nova Wasm!";
+            return str;
+        }
+    "#;
+
+    let wasm = compile_to_wasm(source).expect("String literal compilation failed");
+    let tmp_path = std::env::temp_dir().join("nova_test_string.wasm");
+    std::fs::write(&tmp_path, &wasm).expect("Failed to write test wasm");
+
+    let script = format!(
+        r#"
+        const fs = require('fs');
+        const buf = fs.readFileSync('{}');
+        WebAssembly.instantiate(buf).then(res => {{
+            const ptr = res.instance.exports.get_greeting();
+            const mem = new Uint8Array(res.instance.exports.memory.buffer);
+            let end = ptr;
+            while (mem[end] !== 0) {{
+                end++;
+            }}
+            const str = new TextDecoder('utf-8').decode(mem.subarray(ptr, end));
+            if (str !== "Hello, Nova Wasm!") {{
+                console.error("Expected 'Hello, Nova Wasm!', got:", str);
+                process.exit(1);
+            }}
+            process.exit(0);
+        }}).catch(err => {{
+            console.error(err);
+            process.exit(2);
+        }});
+        "#,
+        tmp_path.display()
+    );
+
+    let output = Command::new("node")
+        .arg("-e")
+        .arg(&script)
+        .output()
+        .expect("Failed to run Node.js");
+
+    assert!(output.status.success(), "String literal Data Section verification failed: {}", String::from_utf8_lossy(&output.stderr));
+    let _ = std::fs::remove_file(tmp_path);
+}
+

@@ -236,6 +236,7 @@ impl TypeChecker {
             Expression::LiteralInt(_, _) => Ok(Type::I32),
             Expression::LiteralFloat(_, _) => Ok(Type::F32),
             Expression::LiteralBool(_, _) => Ok(Type::Bool),
+            Expression::LiteralString(_, _) => Ok(Type::I32),
             Expression::Variable(name, span) => {
                 if let Some(sym) = self.lookup_variable(name) {
                     Ok(sym.ty)

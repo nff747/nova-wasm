@@ -146,6 +146,9 @@ impl WatEmitter {
             Expression::LiteralBool(b, _) => {
                 out.push_str(&format!("{}i32.const {}\n", pad, if *b { 1 } else { 0 }));
             }
+            Expression::LiteralString(s, _) => {
+                out.push_str(&format!("{}i32.const 0 (; string \"{}\" ;)\n", pad, s));
+            }
             Expression::Variable(name, _) => {
                 out.push_str(&format!("{}local.get ${}\n", pad, name));
             }

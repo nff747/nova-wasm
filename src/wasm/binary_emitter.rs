@@ -15,17 +15,26 @@ enum BlockKind {
 
 pub struct WasmBinaryEmitter {
     functions: HashMap<String, u32>,
+    string_offsets: HashMap<String, u32>,
+    data_pool: Vec<u8>,
+    data_base_offset: u32,
 }
 
 impl WasmBinaryEmitter {
     pub fn new() -> Self {
         Self {
             functions: HashMap::new(),
+            string_offsets: HashMap::new(),
+            data_pool: Vec::new(),
+            data_base_offset: 1024,
         }
     }
 
     pub fn emit(&mut self, program: &Program) -> Result<Vec<u8>, String> {
         let mut wasm = Vec::new();
+
+        // 0. Collect string literals into static data pool
+        self.collect_string_literals(program);
 
         // 1. Magic header: \0asm
         wasm.extend_from_slice(&[0x00, 0x61, 0x73, 0x6D]);
@@ -56,9 +65,10 @@ impl WasmBinaryEmitter {
         if let Some(mem) = &program.memory {
             self.emit_memory_section(mem, &mut wasm);
         } else {
-            // Default 1 page linear memory (64 KB)
+            // Compute required linear memory pages to comfortably hold data pool
+            let required_pages = ((self.data_base_offset + self.data_pool.len() as u32 + 65535) / 65536).max(1);
             let default_mem = MemoryDecl {
-                initial_pages: 1,
+                initial_pages: required_pages,
                 max_pages: None,
                 is_export: true,
                 span: crate::token::Span::new(0, 0, 0),
@@ -71,6 +81,11 @@ impl WasmBinaryEmitter {
 
         // 8. Code Section (Section 10)
         self.emit_code_section(program, &mut wasm)?;
+
+        // 9. Data Section (Section 11)
+        if !self.data_pool.is_empty() {
+            self.emit_data_section(&mut wasm);
+        }
 
         Ok(wasm)
     }
@@ -386,6 +401,11 @@ impl WasmBinaryEmitter {
                 body.push(I32_CONST);
                 encode_i32(if *b { 1 } else { 0 }, body);
             }
+            Expression::LiteralString(s, _) => {
+                let offset = self.string_offsets.get(s).copied().unwrap_or(0);
+                body.push(I32_CONST);
+                encode_i32(offset as i32, body);
+            }
             Expression::Variable(name, _) => {
                 let idx = *locals
                     .get(name)
@@ -459,10 +479,108 @@ impl WasmBinaryEmitter {
         Ok(())
     }
 
+    fn emit_data_section(&self, wasm: &mut Vec<u8>) {
+        if self.data_pool.is_empty() {
+            return;
+        }
+        let mut section_payload = Vec::new();
+        // Number of data segments: 1
+        encode_u32(1, &mut section_payload);
+        // Active data segment on memory 0: flags = 0x00
+        section_payload.push(0x00);
+        // Initialization expression: i32.const <data_base_offset> end
+        section_payload.push(I32_CONST);
+        encode_i32(self.data_base_offset as i32, &mut section_payload);
+        section_payload.push(END);
+        // Data length
+        encode_u32(self.data_pool.len() as u32, &mut section_payload);
+        // Data bytes
+        section_payload.extend_from_slice(&self.data_pool);
+
+        self.write_section(SECTION_DATA, &section_payload, wasm);
+    }
+
+    fn collect_string_literals(&mut self, program: &Program) {
+        let mut strings = Vec::new();
+        for func in &program.functions {
+            for stmt in &func.body.statements {
+                scan_statement(stmt, &mut strings);
+            }
+        }
+        for s in strings {
+            if !self.string_offsets.contains_key(&s) {
+                let offset = self.data_base_offset + self.data_pool.len() as u32;
+                self.string_offsets.insert(s.clone(), offset);
+                self.data_pool.extend_from_slice(s.as_bytes());
+                self.data_pool.push(0); // Null terminator
+            }
+        }
+    }
+
     fn write_section(&self, section_id: u8, payload: &[u8], wasm: &mut Vec<u8>) {
         wasm.push(section_id);
         encode_u32(payload.len() as u32, wasm);
         wasm.extend_from_slice(payload);
+    }
+}
+
+fn scan_expression(expr: &Expression, out: &mut Vec<String>) {
+    match expr {
+        Expression::LiteralString(s, _) => out.push(s.clone()),
+        Expression::Binary { left, right, .. } => {
+            scan_expression(left, out);
+            scan_expression(right, out);
+        }
+        Expression::Unary { expr, .. } => scan_expression(expr, out),
+        Expression::Call { args, .. } => {
+            for a in args {
+                scan_expression(a, out);
+            }
+        }
+        Expression::MemoryLoad { ptr, .. } => scan_expression(ptr, out),
+        _ => {}
+    }
+}
+
+fn scan_statement(stmt: &Statement, out: &mut Vec<String>) {
+    match stmt {
+        Statement::Let { init, .. } => {
+            scan_expression(init, out);
+        }
+        Statement::Assignment { value, .. } => scan_expression(value, out),
+        Statement::MemoryStore { ptr, value, .. } => {
+            scan_expression(ptr, out);
+            scan_expression(value, out);
+        }
+        Statement::If {
+            condition,
+            then_branch,
+            else_branch,
+            ..
+        } => {
+            scan_expression(condition, out);
+            for s in &then_branch.statements {
+                scan_statement(s, out);
+            }
+            if let Some(eb) = else_branch {
+                for s in &eb.statements {
+                    scan_statement(s, out);
+                }
+            }
+        }
+        Statement::While { condition, body, .. } => {
+            scan_expression(condition, out);
+            for s in &body.statements {
+                scan_statement(s, out);
+            }
+        }
+        Statement::Return { value, .. } => {
+            if let Some(v) = value {
+                scan_expression(v, out);
+            }
+        }
+        Statement::Expr { expr, .. } => scan_expression(expr, out),
+        Statement::Break(_) => {}
     }
 }
 

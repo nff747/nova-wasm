@@ -57,6 +57,7 @@ pub enum Expression {
     LiteralInt(i64, Span),
     LiteralFloat(f64, Span),
     LiteralBool(bool, Span),
+    LiteralString(String, Span),
     Variable(String, Span),
     Binary {
         op: BinaryOp,
@@ -88,6 +89,7 @@ impl Expression {
             Expression::LiteralInt(_, s)
             | Expression::LiteralFloat(_, s)
             | Expression::LiteralBool(_, s)
+            | Expression::LiteralString(_, s)
             | Expression::Variable(_, s)
             | Expression::Binary { span: s, .. }
             | Expression::Unary { span: s, .. }
