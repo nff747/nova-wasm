@@ -4,7 +4,11 @@ version = "0.1.0"
 edition = "2021"
 authors = ["iKi <180210171+nff747@users.noreply.github.com>"]
 description = "A custom statically typed systems language compiling directly to WebAssembly binary format without LLVM"
-license = "Apache-2.0"
+license = "MIT"
+readme = "README.md"
+repository = "https://github.com/nff747/nova-wasm"
+keywords = ["webassembly", "compiler", "wasm", "systems-language", "jit"]
+categories = ["compilers", "wasm"]
 
 [lib]
 name = "nova_wasm"
