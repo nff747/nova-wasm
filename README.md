@@ -1,5 +1,7 @@
 # Nova (nova-wasm)
 
+[![Powered by nff747](https://img.shields.io/badge/Powered%20by-nff747-111111?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nff747)
+
 [![Build & Test](https://img.shields.io/badge/tests-7%20passing-brightgreen.svg)](#)
 [![WebAssembly](https://img.shields.io/badge/target-WebAssembly%20MVP-654ff0.svg)](#)
 [![Speed](https://img.shields.io/badge/compile%20time-%3C%20250%C2%B5s-orange.svg)](#)
@@ -300,3 +302,18 @@ Nova's test suite includes unit tests and end-to-end integration tests that spin
 ## License
 
 MIT License. Crafted for ultra-fast browser compilation and edge compute.
+
+---
+
+## 📜 Open Source & Commercial Use (MIT)
+
+This project is 100% open-source software under the **[MIT License](LICENSE)**.
+
+### 💼 Commercial Use & Free Redistribution
+You are explicitly permitted to use, modify, fork, integrate, package, and sell commercial products or SaaS built using this engine with **one visible attribution requirement**:
+> **Attribution Requirement**: You must include a visible credit to **nff747** in your application (e.g., `Powered by nff747` linking to [https://github.com/nff747](https://github.com/nff747) in your application UI, footer, about modal, or documentation).
+
+```html
+<!-- Example visible footer attribution -->
+<p>Powered by <a href="https://github.com/nff747" target="_blank">nff747</a></p>
+```
