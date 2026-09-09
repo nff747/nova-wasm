@@ -1,5 +1,7 @@
 # Nova (nova-wasm)
 
+![Nova](assets/banner.jpg)
+
 [![Powered by nff747](https://img.shields.io/badge/Powered%20by-nff747-111111?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nff747)
 
 [![Build & Test](https://img.shields.io/badge/tests-7%20passing-brightgreen.svg)](#)
@@ -8,6 +10,85 @@
 [![Rust](https://img.shields.io/badge/rust-2021%20edition-000000.svg)](#)
 
 > **A statically typed systems language designed for high-throughput client-side computation, compiling directly to raw WebAssembly (`.wasm`) binary format without LLVM overhead.**
+
+---
+
+## 🚀 Getting Started
+
+Nova is a **real, working language compiler**. It directly emits WebAssembly binary bytecode without relying on heavy frameworks like LLVM.
+
+### 1. Build the Compiler
+```bash
+# Clone and build the Nova compiler
+git clone https://github.com/nff747/nova-wasm.git
+cd nova-wasm
+cargo build --release
+```
+
+### 2. Compile a Nova Program
+```bash
+# Compile directly to WebAssembly
+target/release/novac src/main.nova -o main.wasm
+```
+
+### 3. Run in Node.js
+```bash
+node -e "
+const fs = require('fs');
+WebAssembly.instantiate(fs.readFileSync('main.wasm')).then(obj => {
+  console.log('Result:', obj.instance.exports.main());
+});
+"
+```
+
+---
+
+## 👋 Hello World
+
+Here is a simple Hello World equivalent in Nova that returns a status code (as Nova focuses on memory and numbers for pure WebAssembly).
+
+```rust
+// hello.nova
+export fn main() -> i32 {
+    let status: i32 = 0;
+    return status;
+}
+```
+
+---
+
+## 🗺️ Language Tour
+
+Nova supports standard imperative paradigms with syntax similar to Rust.
+
+### Let Bindings & Integers
+```rust
+let x: i32 = 10;
+let mut y: i32 = 20;
+y = y + x;
+```
+
+### Functions
+```rust
+fn add(a: i32, b: i32) -> i32 {
+    return a + b;
+}
+
+export fn compute() -> i32 {
+    let result: i32 = add(5, 7);
+    return result;
+}
+```
+
+### Memory Intrinsics
+Directly access linear WebAssembly memory without abstractions:
+```rust
+memory 1; // 1 Page = 64KB
+
+export fn write_data() {
+    @store_i32(0, 42); // Store 42 at address 0
+}
+```
 
 ---
 
