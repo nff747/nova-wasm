@@ -35,8 +35,6 @@ npm start # or python main.py or cargo run
 
 ![Nova](assets/banner.jpg)
 
-[![Powered by nff747](https://img.shields.io/badge/Powered%20by-nff747-111111?style=for-the-badge&logo=github&logoColor=white)](https://github.com/nff747)
-
 [![Build & Test](https://img.shields.io/badge/tests-7%20passing-brightgreen.svg)](#)
 [![WebAssembly](https://img.shields.io/badge/target-WebAssembly%20MVP-654ff0.svg)](#)
 [![Speed](https://img.shields.io/badge/compile%20time-%3C%20250%C2%B5s-orange.svg)](#)
