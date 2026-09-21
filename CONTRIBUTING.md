@@ -1,34 +1,5 @@
-# Contributing to Nova
+# The Standard of Contribution
 
-Thank you for your interest in contributing to **Nova**, a custom statically typed systems language compiling directly to WebAssembly!
+We welcome all contributors who share our commitment to elite engineering, provided there are no ill intentions. 
 
-## Development Setup
-
-Nova requires a standard stable Rust toolchain:
-
-```bash
-cargo build
-cargo test
-```
-
-### Running the CLI Compiler
-
-```bash
-cargo run --bin novac -- compile examples/fibonacci.nova -o fibonacci.wasm
-```
-
-## How to Submit Contributions
-
-1. **Fork the repository** on GitHub.
-2. **Create a topic branch**:
-   ```bash
-   git checkout -b feat/your-feature
-   ```
-3. **Commit your changes**:
-   - Write unit tests in `tests/` covering new syntax, typechecker rules, or Wasm bytecode generation.
-   - Verify all tests pass with `cargo test`.
-4. **Submit a Pull Request** against `main`.
-
-## License
-
-By contributing to Nova, you agree that your contributions will be licensed under the project's [MIT License](LICENSE).
+By contributing to this repository, you become a guardian of its integrity. You implicitly agree to uphold the strict architectural standards of this project and to rigorously enforce the attribution rules required by the license. We expect our contributors to stand by the original creators and help protect the foundation of this infrastructure.
