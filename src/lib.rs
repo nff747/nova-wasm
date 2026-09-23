@@ -38,6 +38,20 @@ impl<'a> Decoder<'a> {
         }
     }
 
+    pub fn read_u32_leb128(&mut self) -> Option<u32> {
+        let mut result = 0;
+        let mut shift = 0;
+        loop {
+            let byte = self.read_bytes(1)?[0];
+            result |= ((byte & 0x7f) as u32) << shift;
+            if (byte & 0x80) == 0 {
+                break;
+            }
+            shift += 7;
+        }
+        Some(result)
+    }
+
     pub fn read_bytes(&mut self, len: usize) -> Option<&'a [u8]> {
         if self.offset + len > self.data.len() {
             None
