@@ -27,6 +27,17 @@ impl<'a> Decoder<'a> {
         }
     }
 
+    pub fn read_version(&mut self) -> Option<[u8; 4]> {
+        let bytes = self.read_bytes(4)?;
+        let mut version = [0u8; 4];
+        version.copy_from_slice(bytes);
+        if version == WASM_VERSION {
+            Some(version)
+        } else {
+            None
+        }
+    }
+
     pub fn read_bytes(&mut self, len: usize) -> Option<&'a [u8]> {
         if self.offset + len > self.data.len() {
             None
