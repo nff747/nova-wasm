@@ -48,3 +48,41 @@ impl<'a> Decoder<'a> {
         }
     }
 }
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum SectionId {
+    Custom = 0,
+    Type = 1,
+    Import = 2,
+    Function = 3,
+    Table = 4,
+    Memory = 5,
+    Global = 6,
+    Export = 7,
+    Start = 8,
+    Element = 9,
+    Code = 10,
+    Data = 11,
+    DataCount = 12,
+}
+
+impl SectionId {
+    pub fn from_u8(id: u8) -> Option<Self> {
+        match id {
+            0 => Some(SectionId::Custom),
+            1 => Some(SectionId::Type),
+            2 => Some(SectionId::Import),
+            3 => Some(SectionId::Function),
+            4 => Some(SectionId::Table),
+            5 => Some(SectionId::Memory),
+            6 => Some(SectionId::Global),
+            7 => Some(SectionId::Export),
+            8 => Some(SectionId::Start),
+            9 => Some(SectionId::Element),
+            10 => Some(SectionId::Code),
+            11 => Some(SectionId::Data),
+            12 => Some(SectionId::DataCount),
+            _ => None,
+        }
+    }
+}
