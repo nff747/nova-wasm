@@ -16,6 +16,17 @@ impl<'a> Decoder<'a> {
         Self { data, offset: 0 }
     }
 
+    pub fn read_magic(&mut self) -> Option<[u8; 4]> {
+        let bytes = self.read_bytes(4)?;
+        let mut magic = [0u8; 4];
+        magic.copy_from_slice(bytes);
+        if magic == WASM_MAGIC {
+            Some(magic)
+        } else {
+            None
+        }
+    }
+
     pub fn read_bytes(&mut self, len: usize) -> Option<&'a [u8]> {
         if self.offset + len > self.data.len() {
             None
