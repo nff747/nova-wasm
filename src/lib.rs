@@ -1,14 +1,7 @@
-pub fn add(left: u64, right: u64) -> u64 {
-    left + right
-}
+pub const WASM_MAGIC: [u8; 4] = [0x00, 0x61, 0x73, 0x6d]; // \0asm
+pub const WASM_VERSION: [u8; 4] = [0x01, 0x00, 0x00, 0x00];
 
-#[cfg(test)]
-mod tests {
-    use super::*;
-
-    #[test]
-    fn it_works() {
-        let result = add(2, 2);
-        assert_eq!(result, 4);
-    }
+pub struct WasmModule {
+    pub magic: [u8; 4],
+    pub version: [u8; 4],
 }
