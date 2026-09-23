@@ -14,5 +14,15 @@ pub struct Decoder<'a> {
 impl<'a> Decoder<'a> {
     pub fn new(data: &'a [u8]) -> Self {
         Self { data, offset: 0 }
-    }
 }
+}
+    
+        pub fn read_bytes(&mut self, len: usize) -> Option<&'a [u8]> {
+            if self.offset + len > self.data.len() {
+                None
+            } else {
+                let res = &self.data[self.offset..self.offset + len];
+                self.offset += len;
+                Some(res)
+        }
+    }
