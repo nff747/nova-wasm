@@ -127,19 +127,21 @@ pub enum Opcode {
 }
 
 #[cfg(test)]
+
+#[cfg(test)]
 mod tests {
     use super::*;
 
     #[test]
+    fn test_magic() {
+        let mut decoder = Decoder::new(&WASM_MAGIC);
+        assert_eq!(decoder.read_magic(), Some(WASM_MAGIC));
+    }
+
     #[test]
     fn test_leb128() {
         let data = [0xE5, 0x8E, 0x26];
         let mut decoder = Decoder::new(&data);
         assert_eq!(decoder.read_u32_leb128(), Some(624485));
-    }
-
-    fn test_magic() {
-        let mut decoder = Decoder::new(&WASM_MAGIC);
-        assert_eq!(decoder.read_magic(), Some(WASM_MAGIC));
     }
 }
