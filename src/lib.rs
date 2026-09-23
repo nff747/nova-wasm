@@ -5,3 +5,8 @@ pub struct WasmModule {
     pub magic: [u8; 4],
     pub version: [u8; 4],
 }
+
+pub struct Decoder<'a> {
+    data: &'a [u8],
+    offset: usize,
+}
