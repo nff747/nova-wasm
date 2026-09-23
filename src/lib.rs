@@ -114,3 +114,14 @@ pub struct WasmSection<'a> {
     pub size: u32,
     pub data: &'a [u8],
 }
+
+#[derive(Debug, PartialEq, Eq)]
+pub enum Opcode {
+    Unreachable = 0x00,
+    Nop = 0x01,
+    Block = 0x02,
+    Loop = 0x03,
+    If = 0x04,
+    Else = 0x05,
+    End = 0x0B,
+}
