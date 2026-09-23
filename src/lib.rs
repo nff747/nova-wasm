@@ -125,3 +125,14 @@ pub enum Opcode {
     Else = 0x05,
     End = 0x0B,
 }
+
+#[cfg(test)]
+mod tests {
+    use super::*;
+
+    #[test]
+    fn test_magic() {
+        let mut decoder = Decoder::new(&WASM_MAGIC);
+        assert_eq!(decoder.read_magic(), Some(WASM_MAGIC));
+    }
+}
