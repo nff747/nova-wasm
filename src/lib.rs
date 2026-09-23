@@ -86,3 +86,9 @@ impl SectionId {
         }
     }
 }
+
+pub struct WasmSection<'a> {
+    pub id: SectionId,
+    pub size: u32,
+    pub data: &'a [u8],
+}
