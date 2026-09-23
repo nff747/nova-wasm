@@ -10,3 +10,9 @@ pub struct Decoder<'a> {
     data: &'a [u8],
     offset: usize,
 }
+
+impl<'a> Decoder<'a> {
+    pub fn new(data: &'a [u8]) -> Self {
+        Self { data, offset: 0 }
+    }
+}
