@@ -52,6 +52,14 @@ impl<'a> Decoder<'a> {
         Some(result)
     }
 
+    pub fn read_section(&mut self) -> Option<WasmSection<'a>> {
+        let id_byte = self.read_bytes(1)?[0];
+        let id = SectionId::from_u8(id_byte)?;
+        let size = self.read_u32_leb128()?;
+        let data = self.read_bytes(size as usize)?;
+        Some(WasmSection { id, size, data })
+    }
+
     pub fn read_bytes(&mut self, len: usize) -> Option<&'a [u8]> {
         if self.offset + len > self.data.len() {
             None
