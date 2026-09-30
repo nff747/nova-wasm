@@ -5,5 +5,7 @@ edition = "2024"
 license = "MIT"
 authors = ["nff747 <nff747@users.noreply.github.com>"]
 description = "WebAssembly high-performance acceleration runtime."
+repository = "https://github.com/nff747/nova-wasm"
+readme = "README.md"
 
 [dependencies]
