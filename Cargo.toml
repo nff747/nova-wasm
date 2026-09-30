@@ -2,5 +2,8 @@
 name = "nova-wasm"
 version = "0.1.0"
 edition = "2024"
+license = "MIT"
+authors = ["nff747 <nff747@users.noreply.github.com>"]
+description = "WebAssembly high-performance acceleration runtime."
 
 [dependencies]
