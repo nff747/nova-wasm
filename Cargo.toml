@@ -1,10 +1,10 @@
 [package]
 name = "nova-wasm"
-version = "0.1.0"
+version = "0.2.0"
 edition = "2024"
 license = "Apache-2.0"
 authors = ["nff747 <nff747@users.noreply.github.com>"]
-description = "WebAssembly high-performance acceleration runtime."
+description = "High-performance WebAssembly binary format decoder, AST validator & execution runtime in pure Rust."
 repository = "https://github.com/nff747/nova-wasm"
 readme = "README.md"
 
