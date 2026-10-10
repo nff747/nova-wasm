@@ -45,4 +45,6 @@ pub enum Instruction {
     // Control
     Return,
     Call(u32),
+    Br(u32),
+    BrIf(u32),
 }

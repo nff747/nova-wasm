@@ -214,6 +214,7 @@ impl VirtualMachine {
                 Instruction::Call(_) => {
                     // Handled in instance execution
                 }
+                _ => {}
             }
         }
         Ok(self.stack.pop().ok())
