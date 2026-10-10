@@ -79,4 +79,20 @@ impl LinearMemory {
         self.bytes[offset..offset + 8].copy_from_slice(&val.to_le_bytes());
         Ok(())
     }
+
+    pub fn memory_fill(&mut self, dest: usize, val: u8, count: usize) -> Result<(), Trap> {
+        if dest + count > self.bytes.len() {
+            return Err(Trap::OutOfBoundsMemoryAccess);
+        }
+        self.bytes[dest..dest + count].fill(val);
+        Ok(())
+    }
+
+    pub fn memory_copy(&mut self, dest: usize, src: usize, count: usize) -> Result<(), Trap> {
+        if dest + count > self.bytes.len() || src + count > self.bytes.len() {
+            return Err(Trap::OutOfBoundsMemoryAccess);
+        }
+        self.bytes.copy_within(src..src + count, dest);
+        Ok(())
+    }
 }
