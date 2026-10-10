@@ -3,6 +3,7 @@
 pub const WASM_MAGIC: [u8; 4] = [0x00, 0x61, 0x73, 0x6d]; // \0asm
 pub const WASM_VERSION: [u8; 4] = [0x01, 0x00, 0x00, 0x00];
 
+pub mod control;
 pub mod frame;
 pub mod function;
 pub mod global;
@@ -17,6 +18,7 @@ pub mod trap;
 pub mod value;
 pub mod vm;
 
+pub use control::{BlockType, ControlFrame};
 pub use frame::CallFrame;
 pub use function::CompiledFunction;
 pub use global::GlobalVariable;
