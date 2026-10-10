@@ -4,6 +4,7 @@ pub const WASM_MAGIC: [u8; 4] = [0x00, 0x61, 0x73, 0x6d]; // \0asm
 pub const WASM_VERSION: [u8; 4] = [0x01, 0x00, 0x00, 0x00];
 
 pub mod control;
+pub mod float_ops;
 pub mod frame;
 pub mod function;
 pub mod global;
