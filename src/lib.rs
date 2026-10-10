@@ -7,6 +7,7 @@ pub mod frame;
 pub mod function;
 pub mod global;
 pub mod host;
+pub mod i64_ops;
 pub mod instruction;
 pub mod instance;
 pub mod memory;
