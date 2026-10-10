@@ -208,13 +208,19 @@ impl VirtualMachine {
                     let effective = addr + (*offset as usize);
                     self.memory.write_i32(effective, val)?;
                 }
+                Instruction::Br(target) => {
+                    frame.pc = *target as usize;
+                }
+                Instruction::BrIf(target) => {
+                    let cond = self.stack.pop()?.is_truthy();
+                    if cond {
+                        frame.pc = *target as usize;
+                    }
+                }
                 Instruction::Return => {
                     return Ok(self.stack.pop().ok());
                 }
-                Instruction::Call(_) => {
-                    // Handled in instance execution
-                }
-                _ => {}
+                Instruction::Call(_) => {}
             }
         }
         Ok(self.stack.pop().ok())
