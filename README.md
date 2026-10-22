@@ -2,7 +2,7 @@
 
 > Zero-copy WebAssembly binary format decoder and LEB128 streaming parser in Rust.
 
-[![License: MIT](https://img.shields.io/badge/License-Apache_2.0-blue)](LICENSE)
+[![License: Apache 2.0](https://img.shields.io/badge/License-Apache_2.0-blue.svg)](LICENSE)
 [![Rust](https://img.shields.io/badge/Rust-2024%20Edition-orange.svg)](https://www.rust-lang.org/)
 
 `nova-wasm` provides a low-overhead, memory-efficient WebAssembly binary parser engineered for edge runtimes, static analyzers, and bytecode inspectors.
@@ -29,4 +29,4 @@ cargo build --release
 
 ## 📄 License
 
-MIT © [nff747](https://github.com/nff747)
+Apache 2.0 © [nff747](https://github.com/nff747)
