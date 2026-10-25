@@ -39,4 +39,21 @@ impl TableInstance {
     pub fn is_empty(&self) -> bool {
         self.elements.is_empty()
     }
+
+    pub fn max_elements(&self) -> Option<usize> {
+        self.max_elements
+    }
+
+    /// Grows the table by `delta` elements, up to optional `max_elements`.
+    pub fn grow(&mut self, delta: usize, init_val: Option<u32>) -> Result<usize, Trap> {
+        let prev_len = self.elements.len();
+        let new_len = prev_len.checked_add(delta).ok_or(Trap::OutOfBoundsMemoryAccess)?;
+        if let Some(max) = self.max_elements {
+            if new_len > max {
+                return Err(Trap::OutOfBoundsMemoryAccess);
+            }
+        }
+        self.elements.resize(new_len, init_val);
+        Ok(prev_len)
+    }
 }
